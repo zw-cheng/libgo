@@ -52,8 +52,8 @@ void example2()
         int x;
         try {
             x = ch.receive();
-        } catch(std::exception const& e){
-            std::cout << "Exception: " << e.what() << endl;
+        } catch(exception const& e){
+            cout << "Exception: " << e.what() << endl;
             break;
         }
         cout << x <<endl;
@@ -68,6 +68,7 @@ int main()
     cout << "!\n";
 
     // ------------- above is just some test code of boost::coroutine
+    
     cout << "\nExample 1 :\n";
     example1();
 

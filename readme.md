@@ -6,16 +6,17 @@ We used the sample code from [official tutorial](https://tour.golang.org/concurr
 
 A comprison of go grammar and ours:
 
-| operation                     | goroutine               | libgo                     |
-|-------------------------------|-------------------------|---------------------------|
-| create a goroutine            | go func()               | TODO :(                   |
-| create an unbuffered channel  | ch := make(chan int)    | auto ch = chan\<int\>();  |
-|                               |                         | auto ch = make\<int\>();  |
-| create a buffered channel     | ch := make(chan int, 2) | auto ch = chan\<int\>(2); |
-|                               |                         | auto ch = make\<int\>(2); |
-| send value x into the channel | ch <- x                 | ch.send(x);               |
-| receive x from the channel    | x <- ch                 | x = ch.receive();         |
-| discard x from the channel    | <- ch                   | ch.receive();             |
+| operation                     | golang                                 | libgo                                    |
+|-------------------------------|----------------------------------------|------------------------------------------|
+| create a goroutine            | go func()                              | TODO :(                                  |
+| create an unbuffered channel  | ch := make(chan int)                   | auto ch = chan<int>();                   |
+|                               |                                        | auto ch = make<int>();                   |
+| create a buffered channel     | ch := make(chan int, 2)                | auto ch = chan<int>(2);                  |
+|                               |                                        | auto ch = make<int>(2);                  |
+| send value x into the channel | ch <- x                                | ch.send(x);                              |
+| receive x from the channel    | x <- ch                                | x = ch.receive();                        |
+| discard x from the channel    | <- ch                                  | ch.receive();                            |
+| sender close the channel      | v, ok := <-ch  // check is ok is false | try{ch.receive()}  catch(exception e){ } |
 
 # Todo
 
