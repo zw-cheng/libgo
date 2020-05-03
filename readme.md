@@ -14,15 +14,16 @@ A comprison of go grammar and ours:
 | create a buffered channel     | ch := make(chan int, 2)                | auto ch = chan<int>(2);                  |
 |                               |                                        | auto ch = make<int>(2);                  |
 | send value x into the channel | ch <- x                                | ch.send(x);                              |
-| receive x from the channel    | x <- ch                                | x = ch.receive();                        |
+|                               |                                        | ch >> x;                                 |
+| receive x from the channel    | x <- ch                                | ch.receive(x);                           |
+|                               |                                        | ch << x;                                 |
 | discard x from the channel    | <- ch                                  | ch.receive();                            |
 | sender close the channel      | v, ok := <-ch  // check is ok is false | try{ch.receive()}  catch(exception e){ } |
-
 # Todo
 
 1. Make function calls concurrent via boost::coroutine.
 
-2. Make grammar looks better using operater overlaoding.
+2. Make grammar looks better using operater overlaoding. **Done! but needs to handle exception for receive**
 
 3. Unbuffered channels need blocking mechanism.
 
