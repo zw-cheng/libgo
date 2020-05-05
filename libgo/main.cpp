@@ -3,7 +3,7 @@
 #include "goroutine.h"
 
 template <typename T>
-void sum(vector<int> nums, chan<T> &ch)
+void my_sum(vector<int> nums, chan<T> &ch)
 {
     int res = 0;
     for (auto n : nums)
@@ -18,8 +18,8 @@ void example1()
     vector<int> nums{1, 2, 3, 4};
 
     // it should be called by adding go, but for now we call them sequencially
-    sum(vector<int>(nums.begin(), nums.begin() + nums.size() / 2), ch);
-    sum(vector<int>(nums.begin() + nums.size() / 2, nums.end()), ch);
+    my_sum(vector<int>(nums.begin(), nums.begin() + nums.size() / 2), ch);
+    my_sum(vector<int>(nums.begin() + nums.size() / 2, nums.end()), ch);
 
     int res1;
     ch >> res1;
@@ -50,18 +50,9 @@ void example2()
     // it should be called by adding go, but for now we call them sequencially
     fib(10, ch);
 
-    while (1)
-    {
-        int x;
-        try
-        {
-            ch.receive(x);
-        }
-        catch (exception const &e)
-        {
-            cout << "Exception: " << e.what() << endl;
-            break;
-        }
+    int x;
+    // ch.receive() returns false when it is closed
+    while ( ch.receive(x) )  {
         cout << x << endl;
     }
 }

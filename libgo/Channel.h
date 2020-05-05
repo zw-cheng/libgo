@@ -23,14 +23,14 @@ public:
     void send (T x);
     
     // get an x from channel
-    T receive (T &x);
+    bool receive (T &x);
     
     // a sender close the channel, meaning there is no more producers
     void close ();
 
 
     void operator<<(T &x);
-    T operator>>(T &x);
+    bool operator>>(T &x);
 
 private:
     int current_size;
@@ -67,17 +67,17 @@ void chan<T>::send(T x){
     // cout << "send called, approximate q size: " << q.size_approx()<<endl;
 }
 
-
+// return bool instead and don't throw exception
 template <typename T>
-T chan<T>::receive(T &x){
+bool chan<T>::receive(T &x){
     // block and try
     while(!q.try_dequeue(x)){
         if(closed){
-            throw runtime_error("channel closed");
+            return false;
         }
     }
     current_size--;
-    return x;
+    return true;
 }
 
 // channel operations
@@ -93,7 +93,7 @@ void chan<T>::operator<<(T &x){
 }
 
 template<typename T>
-T chan<T>::operator>>(T &x){
+bool chan<T>::operator>>(T &x){
     // todo : Exception
     return this->receive(x);
 }
