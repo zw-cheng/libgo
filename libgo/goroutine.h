@@ -6,18 +6,15 @@
 
 using namespace boost::coroutines;
 
-// namespace goroutine
-// {
-//     char go;
+template <typename Function, typename... Arguments>
+void go(Function func, Arguments... parameters)
+{
+    cout << "go called" << endl;
+    func(parameters...);
+}
 
-//     template <typename T>
-//     inline void operator + (go, T f)
-//     {
-//         // scheduler::spawn(f);
-//     }
-// }
-
-void cooperative(coroutine<void>::push_type &sink){
+void cooperative(coroutine<void>::push_type &sink)
+{
     cout << "Hello";
     sink();
     cout << "world";

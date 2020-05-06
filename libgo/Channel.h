@@ -32,8 +32,7 @@ public:
     void operator<<(T &x);
     bool operator>>(T &x);
 
-private:
-    int current_size;
+    int current_size = 0;
     int buffer_size;
     bool closed = false;
     ConcurrentQueue<T> q;
@@ -42,13 +41,13 @@ private:
 
 // constructors
 template <typename T>
-chan<T>::chan() : buffer_size(INT_MAX), current_size(0){
+chan<T>::chan() : buffer_size(INT_MAX){
     // this should be special - an unbuffered channel should block
     cout << "Unbuffered channel initialized" << endl;
 }
 
 template <typename T>
-chan<T>::chan(int bs) : buffer_size(bs), current_size(0){
+chan<T>::chan(int bs) : buffer_size(bs){
     cout << "Buffered channel initialized" << endl;
 }
 

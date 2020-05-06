@@ -2,24 +2,23 @@
 #include "channel.h"
 #include "goroutine.h"
 
-template <typename T>
-void my_sum(vector<int> nums, chan<T> &ch)
+chan<int> ch;
+
+void my_sum(vector<int> nums, chan<int> *ch)
 {
     int res = 0;
     for (auto n : nums)
         res += n;
-    ch << res; // ch <- res
+    *ch << res; // ch <- res
 }
 
 void example1()
 {
-    auto ch = make<int>(0); // my_chan := make(chan int)
-
     vector<int> nums{1, 2, 3, 4};
 
     // it should be called by adding go, but for now we call them sequencially
-    my_sum(vector<int>(nums.begin(), nums.begin() + nums.size() / 2), ch);
-    my_sum(vector<int>(nums.begin() + nums.size() / 2, nums.end()), ch);
+    go(my_sum, vector<int>(nums.begin(), nums.begin() + nums.size() / 2), &ch);
+    go(my_sum, vector<int>(nums.begin() + nums.size() / 2, nums.end()), &ch);
 
     int res1;
     ch >> res1;
@@ -29,32 +28,35 @@ void example1()
     cout << "sum" << res1 << " + sum" << res2 << " = result" << res1 + res2 << endl;
 }
 
-template <typename T>
-void fib(int n, chan<T> &ch)
+void fib(int n, chan<int>* ch)
 {
     int x = 0, y = 1;
     for (int i = 0; i < n; i++)
     {
-        ch.send(x);
+        ch->send(x);
         int temp = x;
         x = y;
         y = temp + y;
     }
-    ch.close();
+    ch->close();
 }
 
 void example2()
 {
-    auto ch = chan<int>(10); // my_chan := make(chan int)
-
     // it should be called by adding go, but for now we call them sequencially
-    fib(10, ch);
+    go(fib, 10, &ch);
 
     int x;
     // ch.receive() returns false when it is closed
-    while ( ch.receive(x) )  {
+    while (ch.receive(x))
+    {
         cout << x << endl;
     }
+}
+
+void f(int a)
+{
+    cout << "f called, num =" << a << endl;
 }
 
 int main()
@@ -65,8 +67,11 @@ int main()
     cout << "!\n";
 
     // ------------- above is just some test code of boost::coroutine
+    
+    ch = chan<int>(10);
 
-    cout << "\nExample 1 :\n";
+    go(f,777);
+    // cout << "\nExample 1 :\n";
     example1();
 
     cout << "\nExample 2 :\n";
