@@ -1,6 +1,6 @@
 libgo.xcodeproj/
 .DS_Store
 a.out*
-.vsode/
+.vscode/
 lib/
 lib/concurrentqueue

@@ -7,6 +7,8 @@ using namespace moodycamel;
 #ifndef channel_h
 #define channel_h
 
+#include "scheduler.h"
+
 template <typename T>
 class chan {
 public:
@@ -18,7 +20,6 @@ public:
     // // simply call the constructor
     // chan<T> make(int bs);
 
-
     // put value x into channel
     void send (T x);
     
@@ -28,14 +29,23 @@ public:
     // a sender close the channel, meaning there is no more producers
     void close ();
 
-
-    void operator<<(T &x);
-    bool operator>>(T &x);
+    //void operator<<(T &x);
+    //bool operator>>(T &x);
 
     int current_size = 0;
     int buffer_size;
     bool closed = false;
     ConcurrentQueue<T> q;
+
+    friend void operator >> (chan<T>& ch, T& x)
+    {
+        ch.send(x);
+    }
+
+    friend void operator << (chan<T>& ch, T& x)
+    {
+        ch.receive(x);
+    }
 };
 
 
@@ -60,23 +70,28 @@ chan<T> make(int bs = 0) {
 // channel operations
 template <typename T>
 void chan<T>::send(T x){
-    while(current_size >= buffer_size);
+    // while(current_size >= buffer_size);
     current_size++;
     q.enqueue(x);
-    // cout << "send called, approximate q size: " << q.size_approx()<<endl;
+    // yield to main()
+    cout << "send called, approximate q size: " << q.size_approx()<<endl;
+    scheduler::current_sink();
 }
 
 // return bool instead and don't throw exception
 template <typename T>
 bool chan<T>::receive(T &x){
-    // block and try
-    while(!q.try_dequeue(x)){
+    if(!q.try_dequeue(x)){
+        // yield to the scheduler
         if(closed){
             return false;
         }
+        return false;
+    } else {
+        current_size--;
+        scheduler::schedule();
+        return true;
     }
-    current_size--;
-    return true;
 }
 
 // channel operations
@@ -86,15 +101,15 @@ void chan<T>::close(){
     cout << "this channel is closed" <<endl;
 }
 
-template<typename T>
-void chan<T>::operator<<(T &x){
-    return this->send(x);
-}
+// template<typename T>
+// void chan<T>::operator<<(T &x){
+//     return this->send(x);
+// }
 
-template<typename T>
-bool chan<T>::operator>>(T &x){
-    // todo : Exception
-    return this->receive(x);
-}
+// template<typename T>
+// bool chan<T>::operator>>(T &x){
+//     // todo : Exception
+//     return this->receive(x);
+// }
 
 #endif /* channel_h */

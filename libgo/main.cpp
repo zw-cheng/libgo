@@ -1,9 +1,29 @@
 #include <vector>
 #include "channel.h"
 #include "goroutine.h"
+#include "go.h"
 
 chan<int> ch;
 
+int main()
+{
+
+    go ([]() mutable {
+        ch.send(1);
+        ch.send(2);
+    });
+
+    int recv;
+    int sum = 0;
+    ch >> recv;
+    sum += recv;
+    std::cout << "recv is " << recv << " sum is " << sum << std::endl;
+    ch >> recv;
+    sum += recv;
+    std::cout << "recv is " << recv << " sum is " << sum << std::endl;
+}
+
+/*
 void my_sum(vector<int> nums, chan<int> *ch)
 {
     int res = 0;
@@ -17,8 +37,8 @@ void example1()
     vector<int> nums{1, 2, 3, 4};
 
     // it should be called by adding go, but for now we call them sequencially
-    go(my_sum, vector<int>(nums.begin(), nums.begin() + nums.size() / 2), &ch);
-    go(my_sum, vector<int>(nums.begin() + nums.size() / 2, nums.end()), &ch);
+    my_sum( vector<int>(nums.begin(), nums.begin() + nums.size() / 2), &ch);
+    my_sum( vector<int>(nums.begin() + nums.size() / 2, nums.end()), &ch);
 
     int res1;
     ch >> res1;
@@ -54,9 +74,10 @@ void example2()
     }
 }
 
-void f(int a)
+void f(coroutine<void>::push_type &sink)
 {
-    cout << "f called, num =" << a << endl;
+    cout << "f called, num =" << 122 << endl;
+    sink();
 }
 
 int main()
@@ -66,12 +87,14 @@ int main()
     source();
     cout << "!\n";
 
-    // ------------- above is just some test code of boost::coroutine
+    // -------- above is just some test code of boost::coroutine
     
-    ch = chan<int>(10);
+    ch = chan<int>();
 
-    go(f,777);
-    // cout << "\nExample 1 :\n";
+    go(f);
+    coroutine<void>::pull_type fs{f};
+    
+    cout << "\nExample 1 :\n";
     example1();
 
     cout << "\nExample 2 :\n";
@@ -79,3 +102,4 @@ int main()
 
     return 0;
 }
+*/

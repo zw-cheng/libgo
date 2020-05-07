@@ -1,0 +1,7 @@
+go build ./seqgo.go && ./seqgo
+
+go build ./gorot.go && ./gorot
+
+g++ -std=c++17 -g seqc.cpp && ./a.out
+
+g++ -std=c++17 -g corot.cpp -lboost_coroutine && ./a.out
