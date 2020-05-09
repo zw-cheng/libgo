@@ -1,28 +1,31 @@
 #include <boost/coroutine/all.hpp>
 #include <functional>
 #include <iostream>
+#include "../goroutine.h"
+#include "../channel.h"
 
 using namespace boost::coroutines;
 using namespace std::chrono; 
 
-void cooperative(coroutine<int>::push_type &sink, int i)
-{
-    for(int i= 0; i<50000;i++){
-        sink(i);
-    }
-}
+chan<int> ch = make<int>();
 
 int main()
 {
     int res = 0;
 
+
     auto start = high_resolution_clock::now(); 
 
-    using std::placeholders::_1;
-    coroutine<int>::pull_type source{std::bind(cooperative, _1, 0)};
-    for(int i= 0; i<50000;i++){
-        res += source.get();
-        source();
+    go ([]() mutable {
+        for(int i =0;i<50000;i++)
+            ch <<i;
+    });
+
+    int recv;
+    int sum = 0;
+    for(int i =0;i<50000;i++){
+        ch >> recv;
+        sum += recv;
     }
 
     auto stop = high_resolution_clock::now(); 

@@ -1,4 +1,5 @@
 #include<iostream>
+#include<go.h>
 
 using namespace std; 
 using namespace std::chrono; 
