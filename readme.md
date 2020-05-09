@@ -1,30 +1,28 @@
-# Current progress
+# Libgo
 
-We implemted a simple channel based on [concurrentQueue](https://github.com/cameron314/concurrentqueue)
+libgo is a C++ library providing goroutine-like coroutine scheduling, and communication is done via channel.
 
-We used the sample code from [official tutorial](https://tour.golang.org/concurrency/2) to test it (file included in /goexample).
+The goroutines are similated by coroutines provided by boost::coroutine. 
+The channel is based on [concurrentQueue](https://github.com/cameron314/concurrentqueue).
+
+# Usage
 
 A comprison of go grammar and ours:
 
-| operation                     | golang                                 | libgo                                    |
-|-------------------------------|----------------------------------------|------------------------------------------|
-| create a goroutine            | go func()                              | TODO :(                                  |
-| create an unbuffered channel  | ch := make(chan int)                   | auto ch = chan<int>();                   |
-|                               |                                        | auto ch = make<int>();                   |
-| create a buffered channel     | ch := make(chan int, 2)                | auto ch = chan<int>(2);                  |
-|                               |                                        | auto ch = make<int>(2);                  |
-| send value x into the channel | ch <- x                                | ch.send(x);                              |
-|                               |                                        | ch >> x;                                 |
-| receive x from the channel    | x <- ch                                | ch.receive(x);                           |
-|                               |                                        | ch << x;                                 |
-| discard x from the channel    | <- ch                                  | ch.receive();                            |
-| sender close the channel      | v, ok := <-ch  // check is ok is false | try{ch.receive()}  catch(exception e){ } |
-# Todo
+| operation                     | golang                                 | libgo                               |
+|-------------------------------|----------------------------------------|-------------------------------------|
+| create a goroutine            | go func()                              | go(func);                           |
+| create an unbuffered channel  | ch := make(chan int)                   | auto ch = chan<int>();              |
+|                               |                                        | auto ch = make<int>();              |
+| create a buffered channel     | ch := make(chan int, 2)                | auto ch = chan<int>(2);             |
+|                               |                                        | auto ch = make<int>(2);             |
+| send value x into the channel | ch <- x                                | ch.send(x);                         |
+|                               |                                        | ch >> x;                            |
+| receive x from the channel    | x <- ch                                | ch.receive(x);                      |
+|                               |                                        | ch << x;                            |
+| discard x from the channel    | <- ch                                  | ch.receive();                       |
+| sender close the channel      | v, ok := <-ch  // check is ok is false | bool ok = ch.receive() // check ok  |
 
-1. Make function calls concurrent via boost::coroutine.
+# Scheduling policy
 
-2. Make grammar looks better using operater overlaoding. **Done! but needs to handle exception for receive**
-
-3. Unbuffered channels need blocking mechanism.
-
-4. evaluation of performance.
+1. 

@@ -10,106 +10,145 @@ using namespace moodycamel;
 #include "scheduler.h"
 
 template <typename T>
-class chan {
+class chan
+{
 public:
     // constructors
     chan();
 
     chan(int bs);
-    
-    // // simply call the constructor
-    // chan<T> make(int bs);
+
+    // simply call the constructor
+    chan<T> make(int bs);
 
     // put value x into channel
-    void send (T x);
-    
-    // get an x from channel
-    bool receive (T &x);
-    
-    // a sender close the channel, meaning there is no more producers
-    void close ();
+    void send(T x);
 
-    //void operator<<(T &x);
-    //bool operator>>(T &x);
+    // get an x from channel
+    void receive(T &x);
+
+    // a sender close the channel, meaning there is no more producers
+    void close();
+
+    // another way of calling send and recv
+    void operator<<(T &x);
+    void operator>>(T &x);
 
     int current_size = 0;
+    
+    // the size of a channel, given by user
     int buffer_size;
+
     bool closed = false;
     ConcurrentQueue<T> q;
 
-    friend void operator >> (chan<T>& ch, T& x)
-    {
-        ch.send(x);
-    }
-
-    friend void operator << (chan<T>& ch, T& x)
-    {
-        ch.receive(x);
-    }
+    // this deque is used for 
+    deque <
 };
 
+// when the number of elements stored in the queue is equal to the size of
+// buffer, the senders cannot send data until the receiver receives data from
+// the queue
 
 // constructors
+// unbuffered channel: only accept sends if there is a corresponding receive
 template <typename T>
-chan<T>::chan() : buffer_size(INT_MAX){
-    // this should be special - an unbuffered channel should block
+chan<T>::chan() : buffer_size(1)
+{
+#ifdef DEBUG
     cout << "Unbuffered channel initialized" << endl;
+#endif
 }
 
+// buffered channel: accept a limited number of values without a corresponding receive
 template <typename T>
-chan<T>::chan(int bs) : buffer_size(bs){
+chan<T>::chan(int bs) : buffer_size(bs)
+{
+#ifdef DEBUG
     cout << "Buffered channel initialized" << endl;
+#endif
 }
 
 template <typename T>
-chan<T> make(int bs = 0) {
+chan<T> make(int bs = 0)
+{
     return bs == 0 ? chan<T>() : chan<T>(bs);
 };
 
-
 // channel operations
+// push an element into the channel if the channel has some spare space
 template <typename T>
-void chan<T>::send(T x){
-    // while(current_size >= buffer_size);
+void chan<T>::send(T x)
+{
+    // if the buffer is full, pass control to receiver to let the data be received
+    int my_id = scheduler::coroutine_id_queue.back();
+    if (current_size == buffer_size)
+    {
+#ifdef DEBUG
+        std::cout << "buffer full, transfer to main" << std::endl;
+        std::cout << "my id is " << my_id << std::endl;
+        ;
+#endif
+
+        // scheduler::sink_m[my_id]();
+    }
+
     current_size++;
     q.enqueue(x);
-    // yield to main()
-    cout << "send called, approximate q size: " << q.size_approx()<<endl;
-    scheduler::current_sink();
+    // let the receiver to resume
+    if (current_size == buffer_size)
+    {
+        scheduler::coroutine_id_queue.pop_back();
+        scheduler::sink_m[my_id]();
+    }
+    else
+        scheduler::schedule(my_id);
 }
 
-// return bool instead and don't throw exception
+// pop an element from the channel
 template <typename T>
-bool chan<T>::receive(T &x){
-    if(!q.try_dequeue(x)){
-        // yield to the scheduler
-        if(closed){
-            return false;
-        }
-        return false;
-    } else {
-        current_size--;
-        scheduler::schedule();
-        return true;
+void chan<T>::receive(T &x)
+{
+    // transfer control to other coroutines until the channel stores some data
+    while (!q.try_dequeue(x))
+    {
+        scheduler::schedule(0);
     }
+    current_size--;
 }
 
 // channel operations
 template <typename T>
-void chan<T>::close(){
+void chan<T>::close()
+{
     closed = true;
-    cout << "this channel is closed" <<endl;
+#ifdef DEBUG
+    cout << "this channel is closed" << endl;
+#endif
 }
 
-// template<typename T>
-// void chan<T>::operator<<(T &x){
-//     return this->send(x);
-// }
+template <typename T>
+void chan<T>::operator<<(T &x)
+{
+    this->send(x);
+}
 
-// template<typename T>
-// bool chan<T>::operator>>(T &x){
-//     // todo : Exception
-//     return this->receive(x);
-// }
+template <typename T>
+void chan<T>::operator>>(T &x)
+{
+    this->receive(x);
+}
+
+template <typename T>
+void operator<<(chan<T> &ch, const T &x)
+{
+    ch.send(x);
+}
+
+template <typename T>
+void operator>>(chan<T> &ch, const T &x)
+{
+    ch.receive(x);
+}
 
 #endif /* channel_h */

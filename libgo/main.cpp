@@ -1,26 +1,61 @@
 #include <vector>
 #include "channel.h"
 #include "goroutine.h"
-#include "go.h"
+#include "scheduler.h"
 
-chan<int> ch;
+chan<int> ch = make<int>();
 
 int main()
 {
-
     go ([]() mutable {
-        ch.send(1);
-        ch.send(2);
+        std::cout << "send 1" << std::endl;
+        ch << 1;
+        std::cout << "send 2" << std::endl;
+        ch << 2;
+        std::cout << "send 3" << std::endl;
+        ch << 3;
+    });
+
+    go([]() mutable {
+        std::cout << "send 4" << std::endl;
+        ch << 4;
+        std::cout << "send 5" << std::endl;
+        ch << 5;
     });
 
     int recv;
     int sum = 0;
     ch >> recv;
     sum += recv;
-    std::cout << "recv is " << recv << " sum is " << sum << std::endl;
+    std::cout << "recved " << recv << " sum is " << sum << std::endl;
     ch >> recv;
     sum += recv;
-    std::cout << "recv is " << recv << " sum is " << sum << std::endl;
+    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    ch >> recv;
+    sum += recv;
+
+    go([]() mutable {
+        std::cout << "send 6" << std::endl;
+        ch << 6;
+        std::cout << "send 7" << std::endl;
+        ch << 7;
+        std::cout << "send 8" << std::endl;
+        ch << 8;
+     });
+
+    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    ch >> recv;
+    sum += recv;
+    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    ch >> recv;
+    sum += recv;
+    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    ch >> recv;
+    sum += recv;
+    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    ch >> recv;
+    sum += recv;
+    std::cout << "recved " << recv << " sum is " << sum << std::endl;
 }
 
 /*
