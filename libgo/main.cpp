@@ -5,6 +5,7 @@
 
 chan<int> ch = make<int>();
 
+// an example
 int main()
 {
     go ([]() mutable {
@@ -27,10 +28,10 @@ int main()
     int sum = 0;
     ch >> recv;
     sum += recv;
-    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    std::cout << "recv is " << recv << " sum is " << sum << std::endl;
     ch >> recv;
     sum += recv;
-    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    std::cout << "recv is " << recv << " sum is " << sum << std::endl;
     ch >> recv;
     sum += recv;
 
@@ -43,19 +44,19 @@ int main()
         ch << 8;
      });
 
-    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    std::cout << "recv is " << recv << " sum is " << sum << std::endl;
     ch >> recv;
     sum += recv;
-    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    std::cout << "recv is " << recv << " sum is " << sum << std::endl;
     ch >> recv;
     sum += recv;
-    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    std::cout << "recv is " << recv << " sum is " << sum << std::endl;
     ch >> recv;
     sum += recv;
-    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    std::cout << "recv is " << recv << " sum is " << sum << std::endl;
     ch >> recv;
     sum += recv;
-    std::cout << "recved " << recv << " sum is " << sum << std::endl;
+    std::cout << "recv is " << recv << " sum is " << sum << std::endl;
 }
 
 /*
