@@ -25,4 +25,8 @@ A comprison of go grammar and ours:
 
 # Scheduling policy
 
-1. 
+1. The main function acts as the only receiver while other goroutines act as senders.
+2. If the channel is full and the sender wants to send data, the sender will give up its control and transfer control to the receiver.
+3. If the channel is empty and the receiver wants to receive data, the receiver will give up its control and transfer control to one of the senders.
+4. After a goroutine sends/receives data, it will transfer the control to other goroutine.
+5. The scheduler maintains a queue of goroutines and always resumes the header of the queue and puts the header goroutine to the back og the queue.
